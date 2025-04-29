@@ -23,16 +23,16 @@
 #define MAGNITUDE_THRESHOLD 1000
 
 // WiFi Configuration
-const char* ssid = "ADSPACE";
-const char* password = "ADSPACEPARTNER";
+const char* ssid = "inwi Home 4GA11A20";
+const char* password = "42674857";
 
 // Backend Configuration
 // Try different IP addresses if one doesn't work
 const char* backendUrls[] = {
-  "http://192.168.4.1:3000/api/detections",    // ESP32 network gateway
-  "http://192.168.43.137:3000/api/detections", // Computer's IP
-  "http://192.168.43.1:3000/api/detections",   // Router IP (common gateway)
-  "http://192.168.1.100:3000/api/detections"   // Alternative IP (update as needed)
+  "http://192.168.8.109:3000/api/detections",    // ESP32 network gateway
+//  "http://192.168.43.137:3000/api/detections", // Computer's IP
+//  "http://192.168.43.1:3000/api/detections",   // Router IP (common gateway)
+//  "http://192.168.1.100:3000/api/detections"   // Alternative IP (update as needed)
 };
 const int numBackendUrls = 4;
 int currentUrlIndex = 0;
@@ -493,15 +493,21 @@ void analyzeTargetRange() {
     }
   }
 
+  // Calculate scaled magnitude
+  int scaledMagnitude = (int)(maxMagnitude * 5000);
+
   // Only process if magnitude threshold is met
   if ((int)(maxMagnitude * 1000) >= MAGNITUDE_THRESHOLD) {
     Serial.print("Peak Frequency: ");
     Serial.print(peakFreq, 0);
     Serial.print(" Hz\nPeak Magnitude: ");
-    Serial.println((int)(maxMagnitude * 5000));
+    Serial.println(scaledMagnitude);
     Serial.println(); // Extra blank line for readability
     
-    // Send detection to backend
-    sendDetectionToBackend(peakFreq, maxMagnitude * 5000);
+    // Only send detection to backend if magnitude exceeds 20000
+    if (scaledMagnitude >= 20000) {
+      Serial.println("Magnitude exceeds 20000, sending to server...");
+      sendDetectionToBackend(peakFreq, scaledMagnitude);
+    }
   }
 }
